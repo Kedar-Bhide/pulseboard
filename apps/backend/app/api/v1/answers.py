@@ -5,6 +5,9 @@ from app.services.crud_answer import create_answer
 from app.database import SessionLocal
 from app.dependencies import get_current_user
 from app.models.user import User
+from typing import List
+from app.schemas.answer import AnswerOut
+from app.services.crud_answer import get_answers_by_user
 
 router = APIRouter()
 
@@ -28,3 +31,10 @@ def submit_checkin_answer(
         "id": saved.id,
         "timestamp": saved.timestamp
     }
+
+@router.get("/me/answers", response_model=List[AnswerOut])
+def get_my_answers(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return get_answers_by_user(db, user_id=current_user.id)
