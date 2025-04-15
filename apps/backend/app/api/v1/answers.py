@@ -8,6 +8,9 @@ from app.models.user import User
 from typing import List
 from app.schemas.answer import AnswerOut
 from app.services.crud_answer import get_answers_by_user
+from datetime import datetime, timedelta
+from app.core.summary import generate_weekly_summary
+from app.models.answer import Answer
 
 router = APIRouter()
 
@@ -38,3 +41,21 @@ def get_my_answers(
     current_user: User = Depends(get_current_user)
 ):
     return get_answers_by_user(db, user_id=current_user.id)
+
+@router.get("/me/summary/weekly")
+def get_weekly_summary(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Filter past 7 days
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    recent_answers = (
+        db.query(Answer)
+        .filter(Answer.user_id == current_user.id)
+        .filter(Answer.timestamp >= week_ago)
+        .order_by(Answer.timestamp.asc())
+        .all()
+    )
+
+    summary = generate_weekly_summary(recent_answers)
+    return {"summary": summary}
