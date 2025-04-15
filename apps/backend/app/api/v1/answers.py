@@ -59,3 +59,46 @@ def get_weekly_summary(
 
     summary = generate_weekly_summary(recent_answers)
     return {"summary": summary}
+
+@router.get("/me/stats")
+def get_checkin_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    all_answers = get_answers_by_user(db, current_user.id)
+    total = len(all_answers)
+
+    if total == 0:
+        return {
+            "total": 0,
+            "current_streak": 0,
+            "longest_streak": 0,
+            "last_checkin": None,
+        }
+
+    # Extract just the date parts
+    dates = sorted({a.timestamp.date() for a in all_answers})
+    last_checkin = dates[-1]
+
+    # Calculate streaks
+    from datetime import timedelta
+    streak = 1
+    longest_streak = 1
+
+    for i in range(len(dates) - 2, -1, -1):
+        delta = (dates[i + 1] - dates[i]).days
+        if delta == 1:
+            streak += 1
+            longest_streak = max(longest_streak, streak)
+        elif delta > 1:
+            break
+
+    today = datetime.utcnow().date()
+    current_streak = streak if dates[-1] == today or dates[-1] == today - timedelta(days=1) else 0
+
+    return {
+        "total": total,
+        "current_streak": current_streak,
+        "longest_streak": longest_streak,
+        "last_checkin": last_checkin.isoformat()
+    }
