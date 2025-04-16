@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from app.schemas.answer import CheckinAnswerCreate
+from app.schemas.answer import CheckinAnswerCreate, AnswerOut
 from app.services.crud_answer import create_answer
 from app.database import SessionLocal
 from app.dependencies import get_current_user
 from app.models.user import User
 from typing import List
-from app.schemas.answer import AnswerOut
 from app.services.crud_answer import get_answers_by_user
 from datetime import datetime, timedelta
 from app.core.summary import generate_weekly_summary
@@ -37,9 +36,17 @@ def submit_checkin_answer(
 @router.get("/me/answers", response_model=List[AnswerOut])
 def get_my_answers(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    q: str = Query(default=None, description="Search term")
 ):
     answers = get_answers_by_user(db, user_id=current_user.id)
+
+    if q:
+        q_lower = q.lower()
+        answers = [
+            a for a in answers
+            if q_lower in a.answer.lower() or (a.question and q_lower in a.question.content.lower())
+        ]
 
     return [
         AnswerOut(
