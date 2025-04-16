@@ -12,3 +12,5 @@ class Answer(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user = relationship("User", back_populates="answers")
+    question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
+    question = relationship("Question")

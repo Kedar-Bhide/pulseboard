@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 class CheckinAnswerCreate(BaseModel):
-    question: str
+    question_id: int
     answer: str
 
 class AnswerOut(BaseModel):

@@ -5,7 +5,7 @@ from typing import List
 
 def create_answer(db: Session, answer_data: CheckinAnswerCreate, user_id: int) -> Answer:
     db_answer = Answer(
-        question=answer_data.question,
+        question_id=answer_data.question_id,
         answer=answer_data.answer,
         user_id=user_id
     )

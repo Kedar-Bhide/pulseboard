@@ -30,8 +30,7 @@ def submit_checkin_answer(
     saved = create_answer(db, payload, user_id=current_user.id)
     return {
         "message": "Answer saved",
-        "user": current_user.email,
-        "id": saved.id,
+        "question_id": saved.question_id,
         "timestamp": saved.timestamp
     }
 
