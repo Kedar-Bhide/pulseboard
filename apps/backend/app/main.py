@@ -3,11 +3,13 @@ from app.api.v1 import questions, answers
 from app.database import Base, engine
 from app.models import answer
 from app.api.v1 import auth
+from app.core.scheduler import start_scheduler
 
 # Create DB tables (only on startup for now)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+start_scheduler()
 
 # Register routers
 app.include_router(questions.router, prefix="/api/v1")
