@@ -1,8 +1,16 @@
+from app.core.gpt import ask_openai
+from app.services.crud_question import create_question
+from app.database import SessionLocal
+
 def generate_and_log_question():
-    from app.core.gpt import ask_openai
     prompt = (
-        "Generate one thought-provoking check-in question for a startup team "
-        "related to product, growth, or team alignment."
+        "Generate one thoughtful check-in question for a startup team. "
+        "Keep it relevant to team dynamics, product, or founder clarity."
     )
-    question = ask_openai(prompt)
-    print(f"Daily Question: {question}")
+    question_text = ask_openai(prompt)
+
+    db = SessionLocal()
+    create_question(db, question_text)
+    db.close()
+
+    print(f"✅ Daily question saved: {question_text}")
