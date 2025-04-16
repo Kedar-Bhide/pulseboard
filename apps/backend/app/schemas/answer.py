@@ -7,9 +7,9 @@ class CheckinAnswerCreate(BaseModel):
 
 class AnswerOut(BaseModel):
     id: int
-    question: str
     answer: str
     timestamp: datetime
-
+    question: str  
+    
     class Config:
         orm_mode = True

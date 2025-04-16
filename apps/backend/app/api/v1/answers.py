@@ -39,7 +39,16 @@ def get_my_answers(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return get_answers_by_user(db, user_id=current_user.id)
+    answers = get_answers_by_user(db, user_id=current_user.id)
+
+    return [
+        AnswerOut(
+            id=a.id,
+            answer=a.answer,
+            timestamp=a.timestamp,
+            question=a.question.content if a.question else "N/A"
+        ) for a in answers
+    ]
 
 @router.get("/me/summary/weekly")
 def get_weekly_summary(
