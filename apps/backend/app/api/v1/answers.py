@@ -10,6 +10,7 @@ from app.services.crud_answer import get_answers_by_user
 from datetime import datetime, timedelta
 from app.core.summary import generate_weekly_summary
 from app.models.answer import Answer
+from app.services.analytics import get_users_who_didnt_checkin_today
 
 router = APIRouter()
 
@@ -117,3 +118,8 @@ def get_checkin_stats(
         "longest_streak": longest_streak,
         "last_checkin": last_checkin.isoformat()
     }
+
+@router.get("/admin/missed-checkins")
+def get_users_who_missed_today(db: Session = Depends(get_db)):
+    users = get_users_who_didnt_checkin_today(db)
+    return [{"id": u.id, "email": u.email} for u in users]
