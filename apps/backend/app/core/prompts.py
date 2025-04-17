@@ -25,6 +25,6 @@ def send_missed_checkin_reminders():
     for user in users:
         if user.slack_id:
             message = generate_nudge(user.email.split("@")[0])
-            send_slack_dm(user.slack_id, message)
-            print(f"✅ Sent reminder to {user.email}")
+            send_slack_dm(user.slack_id, message, include_button=True)
+            print(f"Sent reminder to {user.email}")
     db.close()
