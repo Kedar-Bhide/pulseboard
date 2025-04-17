@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from app.core.summary import generate_weekly_summary
 from app.models.answer import Answer
 from app.services.analytics import get_users_who_didnt_checkin_today
+from app.core.reminder import generate_nudge
 
 router = APIRouter()
 
@@ -123,3 +124,16 @@ def get_checkin_stats(
 def get_users_who_missed_today(db: Session = Depends(get_db)):
     users = get_users_who_didnt_checkin_today(db)
     return [{"id": u.id, "email": u.email} for u in users]
+
+@router.get("/admin/missed-checkins/messages")
+def get_nudge_messages(db: Session = Depends(get_db)):
+    users = get_users_who_didnt_checkin_today(db)
+    messages = [
+        {
+            "user_id": u.id,
+            "email": u.email,
+            "message": generate_nudge(u.email.split("@")[0])  # Use name part
+        }
+        for u in users
+    ]
+    return messages
