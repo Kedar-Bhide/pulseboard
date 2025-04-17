@@ -9,3 +9,4 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     answers = relationship("Answer", back_populates="user")
+    slack_id = Column(String, nullable=True)
