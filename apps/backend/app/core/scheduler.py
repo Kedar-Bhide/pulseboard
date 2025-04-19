@@ -1,5 +1,5 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-from app.core.prompts import generate_and_log_question, send_missed_checkin_reminders
+from app.core.prompts import generate_and_log_question, send_missed_checkin_reminders, send_weekly_summaries
 import logging
 
 scheduler = BackgroundScheduler()
@@ -16,5 +16,12 @@ def start_scheduler():
         hour=17,  # 5pm UTC, change as needed
         minute=0
     )
+
+    scheduler.add_job(
+        func=send_weekly_summaries,
+        trigger="cron",
+        day_of_week="sun", hour=17, minute=0  # Sundays at 5PM UTC
+    )
+    
     scheduler.start()
     logging.info("Scheduler started with daily question job.")
