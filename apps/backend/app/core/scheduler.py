@@ -22,6 +22,14 @@ def start_scheduler():
         trigger="cron",
         day_of_week="sun", hour=17, minute=0  # Sundays at 5PM UTC
     )
+
+    from app.core.prompts import send_email_reminders
+
+    scheduler.add_job(
+        func=send_email_reminders,
+        trigger="cron",
+        hour=10, minute=0  # 10AM UTC
+    )
     
     scheduler.start()
     logging.info("Scheduler started with daily question job.")

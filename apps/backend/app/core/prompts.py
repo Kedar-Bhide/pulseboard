@@ -7,9 +7,9 @@ from app.core.slack import send_slack_dm
 from app.models.user import User
 from app.services.crud_answer import get_answers_by_user
 from app.core.summary import generate_weekly_summary
-from app.core.slack import send_slack_dm
 from datetime import datetime, timedelta
 from app.models.answer import Answer
+from app.core.email import send_email
 
 def generate_and_log_question():
     prompt = (
@@ -51,5 +51,22 @@ def send_weekly_summaries():
 
         summary = generate_weekly_summary(answers)
         send_slack_dm(user.slack_id, f"🧠 *Your Weekly Check-In Summary:*\n{summary}")
+
+    db.close()
+
+def send_email_reminders():
+    db = SessionLocal()
+    users = get_users_who_didnt_checkin_today(db)
+
+    for user in users:
+        if user.email:
+            subject = "Don’t miss your Pulseboard check-in today"
+            body = (
+                "Hi there!<br><br>"
+                "Just a quick reminder to take 2 minutes and submit your daily check-in.<br><br>"
+                "<a href='https://pulseboard.app/checkin'>Check In Now</a><br><br>"
+                "– The Pulseboard Team"
+            )
+            send_email(user.email, subject, body)
 
     db.close()
