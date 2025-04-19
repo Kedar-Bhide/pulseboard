@@ -21,8 +21,8 @@ async def slack_interactions(request: Request):
     payload = json.loads(form_data["payload"])
     user_id = payload["user"]["id"]
 
-    # Handle button click: open modal
     if payload["type"] == "block_actions":
+        # Button clicked → open modal
         trigger_id = payload.get("trigger_id")
         db = SessionLocal()
         question = get_today_question(db)
@@ -32,8 +32,8 @@ async def slack_interactions(request: Request):
         client.views_open(trigger_id=trigger_id, view=modal_view)
         return JSONResponse(content={})
 
-    # Handle modal submission
     if payload["type"] == "view_submission":
+        # Modal submitted → store answer
         db = SessionLocal()
         user = db.query(User).filter(User.slack_id == user_id).first()
         question = get_today_question(db)
@@ -49,6 +49,13 @@ async def slack_interactions(request: Request):
             )
             db.add(db_answer)
             db.commit()
+
+            # Send Slack confirmation message
+            from app.core.slack import send_slack_dm
+            send_slack_dm(
+                user_id=user.slack_id,
+                message="Got your check-in! You're building momentum today"
+            )
 
         db.close()
         return JSONResponse(content={})
