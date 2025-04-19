@@ -22,6 +22,7 @@ async def slack_interactions(request: Request):
 
     form_data = await request.form()
     payload = json.loads(form_data["payload"])
+    user_id = payload["user"]["id"]
 
     if payload["type"] == "block_actions":
         # Button clicked → open modal
