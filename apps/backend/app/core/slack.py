@@ -32,3 +32,28 @@ def send_slack_dm(user_id: str, message: str, include_button: bool = False):
     except SlackApiError as e:
         print(f"Slack error: {e.response['error']}")
         return None
+    
+def build_checkin_modal(question_text: str):
+    return {
+        "type": "modal",
+        "callback_id": "submit_checkin_modal",
+        "title": {"type": "plain_text", "text": "Daily Check-In"},
+        "submit": {"type": "plain_text", "text": "Submit"},
+        "close": {"type": "plain_text", "text": "Cancel"},
+        "blocks": [
+            {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": f"*Today's Question:*\n{question_text}"}
+            },
+            {
+                "type": "input",
+                "block_id": "answer_block",
+                "element": {
+                    "type": "plain_text_input",
+                    "action_id": "answer_input",
+                    "multiline": True
+                },
+                "label": {"type": "plain_text", "text": "Your Answer"}
+            }
+        ]
+    }
