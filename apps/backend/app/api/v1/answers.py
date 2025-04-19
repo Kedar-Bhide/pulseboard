@@ -137,3 +137,41 @@ def get_nudge_messages(db: Session = Depends(get_db)):
         for u in users
     ]
     return messages
+
+@router.get("/admin/engagement-summary")
+def get_engagement_summary(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    today = datetime.utcnow().date()
+    week_ago = datetime.utcnow() - timedelta(days=7)
+
+    summary = []
+
+    for user in users:
+        answers = get_answers_by_user(db, user.id)
+        total = len(answers)
+        last = answers[0].timestamp.date() if answers else None
+
+        # Streak calc
+        dates = sorted({a.timestamp.date() for a in answers})
+        streak = 1
+        for i in range(len(dates) - 2, -1, -1):
+            if (dates[i + 1] - dates[i]).days == 1:
+                streak += 1
+            else:
+                break
+
+        current_streak = streak if dates and dates[-1] in [today, today - timedelta(days=1)] else 0
+
+        # Today’s check-in?
+        has_checked_in_today = any(a.timestamp.date() == today for a in answers)
+
+        summary.append({
+            "user": user.email,
+            "slack_id": user.slack_id,
+            "total_checkins": total,
+            "last_checkin": last.isoformat() if last else None,
+            "current_streak": current_streak,
+            "checked_in_today": has_checked_in_today
+        })
+
+    return summary
