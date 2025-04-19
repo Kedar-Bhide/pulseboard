@@ -11,15 +11,17 @@ from app.models.question import Question
 from app.services.crud_question import get_today_question
 from app.database import SessionLocal
 from datetime import datetime
-
+from app.core.verify_slack import verify_slack_request
 
 router = APIRouter()
 
 @router.post("/interactions")
 async def slack_interactions(request: Request):
+    raw_body = await request.body()
+    verify_slack_request(request, raw_body)
+
     form_data = await request.form()
     payload = json.loads(form_data["payload"])
-    user_id = payload["user"]["id"]
 
     if payload["type"] == "block_actions":
         # Button clicked → open modal
