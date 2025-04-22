@@ -10,3 +10,13 @@ export interface UserAnswer {
     if (!res.ok) throw new Error("Failed to fetch user answers");
     return res.json();
   }
+
+export interface WeeklySummary {
+    summary: string;
+  }
+  
+  export async function fetchUserWeeklySummary(userEmail: string): Promise<WeeklySummary> {
+    const res = await fetch(`http://localhost:8000/api/v1/admin/weekly-summary?email=${userEmail}`);
+    if (!res.ok) throw new Error("Failed to fetch summary");
+    return res.json();
+  }

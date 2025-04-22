@@ -1,28 +1,47 @@
 import { useEffect, useState } from "react";
-import { fetchUserAnswers, UserAnswer } from "../api/user";
+import { fetchUserAnswers, UserAnswer, fetchUserWeeklySummary, WeeklySummary } from "../api/user";
 
 export default function UserAnswers({ email, onBack }: { email: string; onBack: () => void }) {
   const [answers, setAnswers] = useState<UserAnswer[]>([]);
+  const [summary, setSummary] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUserAnswers(email).then(setAnswers).finally(() => setLoading(false));
+    Promise.all([
+      fetchUserAnswers(email),
+      fetchUserWeeklySummary(email),
+    ])
+      .then(([ans, summaryData]) => {
+        setAnswers(ans);
+        setSummary(summaryData.summary);
+      })
+      .finally(() => setLoading(false));
   }, [email]);
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <button onClick={onBack}>⬅️ Back</button>
-      <h2>Check-ins for {email}</h2>
-      {loading ? <p>Loading...</p> : (
-        <ul>
-          {answers.map(ans => (
-            <li key={ans.id} style={{ marginBottom: "1rem" }}>
-              <b>{new Date(ans.timestamp).toLocaleString()}</b><br />
-              <i>Q: {ans.question}</i><br />
-              <p>A: {ans.answer}</p>
-            </li>
-          ))}
-        </ul>
+    <div className="p-6 max-w-4xl mx-auto">
+      <button onClick={onBack} className="text-blue-600 hover:underline mb-4">⬅️ Back</button>
+      <h2 className="text-2xl font-bold mb-4">Check-ins for {email}</h2>
+
+      {loading ? (
+        <p className="text-gray-600">Loading...</p>
+      ) : (
+        <>
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded">
+            <h3 className="font-semibold mb-2">🧠 Weekly Summary</h3>
+            <p className="text-gray-800 whitespace-pre-line">{summary}</p>
+          </div>
+
+          <ul className="space-y-4">
+            {answers.map(ans => (
+              <li key={ans.id} className="p-4 border rounded shadow-sm">
+                <p className="text-sm text-gray-500">{new Date(ans.timestamp).toLocaleString()}</p>
+                <p className="text-gray-700 italic">Q: {ans.question}</p>
+                <p className="text-gray-900 mt-2">A: {ans.answer}</p>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

@@ -191,3 +191,21 @@ def get_user_answers(email: str, db: Session = Depends(get_db)):
             "timestamp": a.timestamp
         } for a in answers
     ]
+
+@router.get("/admin/weekly-summary")
+def get_weekly_summary(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    answers = (
+        db.query(Answer)
+        .filter(Answer.user_id == user.id)
+        .filter(Answer.timestamp >= week_ago)
+        .order_by(Answer.timestamp.asc())
+        .all()
+    )
+
+    summary = generate_weekly_summary(answers)
+    return {"summary": summary}
