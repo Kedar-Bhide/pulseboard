@@ -27,14 +27,28 @@ export default function UserAnswers({ email, onBack }: { email: string; onBack: 
         <p className="text-gray-600">Loading...</p>
       ) : (
         <>
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded">
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded shadow">
             <h3 className="font-semibold mb-2">🧠 Weekly Summary</h3>
             <p className="text-gray-800 whitespace-pre-line">{summary}</p>
           </div>
 
+          {summary && (
+            <div className="mb-6 flex justify-end">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`Weekly Summary for ${email}:\n\n${summary}`);
+                  alert("Summary copied to clipboard!");
+                }}
+                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+              >
+                📋 Copy Summary
+              </button>
+            </div>
+          )}
+
           <ul className="space-y-4">
             {answers.map(ans => (
-              <li key={ans.id} className="p-4 border rounded shadow-sm">
+              <li key={ans.id} className="p-4 border border-gray-300 rounded shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-sm text-gray-500">{new Date(ans.timestamp).toLocaleString()}</p>
                 <p className="text-gray-700 italic">Q: {ans.question}</p>
                 <p className="text-gray-900 mt-2">A: {ans.answer}</p>
