@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from app.schemas.answer import CheckinAnswerCreate, AnswerOut
 from app.services.crud_answer import create_answer
@@ -175,3 +175,19 @@ def get_engagement_summary(db: Session = Depends(get_db)):
         })
 
     return summary
+
+@router.get("/admin/user-answers")
+def get_user_answers(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    answers = get_answers_by_user(db, user_id=user.id)
+    return [
+        {
+            "id": a.id,
+            "question": a.question.content if a.question else "N/A",
+            "answer": a.answer,
+            "timestamp": a.timestamp
+        } for a in answers
+    ]

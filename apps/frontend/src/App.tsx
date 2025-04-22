@@ -1,15 +1,21 @@
 import { useEffect, useState } from "react";
 import { fetchEngagementSummary, UserSummary } from "./api/summary";
+import UserAnswers from "./components/UserAnswers";
 
 function App() {
   const [summary, setSummary] = useState<UserSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEngagementSummary()
       .then(setSummary)
       .finally(() => setLoading(false));
   }, []);
+
+  if (selectedUser) {
+    return <UserAnswers email={selectedUser} onBack={() => setSelectedUser(null)} />;
+  }
 
   return (
     <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
@@ -30,7 +36,9 @@ function App() {
           <tbody>
             {summary.map((user) => (
               <tr key={user.user}>
-                <td>{user.user}</td>
+                <td>
+                  <button onClick={() => setSelectedUser(user.user)}>{user.user}</button>
+                </td>
                 <td>{user.total_checkins}</td>
                 <td>{user.last_checkin || "—"}</td>
                 <td>{user.current_streak}</td>
