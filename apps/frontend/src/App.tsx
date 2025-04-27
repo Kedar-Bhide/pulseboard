@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { fetchEngagementSummary, fetchTeamSummaries, UserSummary } from "./api/summary";
 import UserAnswers from "./components/UserAnswers";
+import { Sparklines, SparklinesBars } from "react-sparklines";
+import { fetchUserActivity } from "./api/user";
 
 function App() {
   const [summary, setSummary] = useState<UserSummary[]>([]);
@@ -11,9 +13,15 @@ function App() {
 
   useEffect(() => {
     fetchEngagementSummary()
-      .then((data) => {
-        setSummary(data);
-        setFiltered(data); // show all by default
+      .then(async (data) => {
+        const updatedData = await Promise.all(
+          data.map(async (user) => {
+            const activity = await fetchUserActivity(user.user);
+            return { ...user, activity };
+          })
+        );
+        setSummary(updatedData);
+        setFiltered(updatedData);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -107,6 +115,7 @@ function App() {
                 <th className="p-2 text-center">Last</th>
                 <th className="p-2 text-center">Streak</th>
                 <th className="p-2 text-center">Today</th>
+                <th className="p-2 text-center">Trend</th>
               </tr>
             </thead>
             <tbody>
@@ -138,6 +147,13 @@ function App() {
                     )}
                   </td>
                   <td className="p-2 text-center">{user.checked_in_today ? "✅" : "❌"}</td>
+                  <td className="p-2 text-center">
+                    <div className="h-6 w-20 mx-auto">
+                      <Sparklines data={user.activity || [0, 0, 0, 0, 0, 0, 0]} limit={7} width={60} height={20} margin={2}>
+                        <SparklinesBars style={{ fill: "#4299e1" }} />
+                      </Sparklines>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

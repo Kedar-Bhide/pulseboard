@@ -1,11 +1,12 @@
 export interface UserSummary {
-    user: string;
-    slack_id: string | null;
-    total_checkins: number;
-    last_checkin: string | null;
-    current_streak: number;
-    checked_in_today: boolean;
-  }
+  user: string;
+  slack_id: string | null;
+  total_checkins: number;
+  last_checkin: string | null;
+  current_streak: number;
+  checked_in_today: boolean;
+  activity?: number[];
+}
   
   export async function fetchEngagementSummary(): Promise<UserSummary[]> {
     const res = await fetch("http://localhost:8000/api/v1/admin/engagement-summary");
