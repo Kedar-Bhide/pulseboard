@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchEngagementSummary, UserSummary } from "./api/summary";
+import { fetchEngagementSummary, fetchTeamSummaries, UserSummary } from "./api/summary";
 import UserAnswers from "./components/UserAnswers";
 
 function App() {
@@ -122,7 +122,21 @@ function App() {
                   </td>
                   <td className="p-2 text-center">{user.total_checkins}</td>
                   <td className="p-2 text-center">{user.last_checkin || "—"}</td>
-                  <td className="p-2 text-center">{user.current_streak}</td>
+                  <td className="p-2 text-center">
+                    {user.current_streak > 5 ? (
+                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                        🔥 {user.current_streak} days
+                      </span>
+                    ) : user.current_streak > 0 ? (
+                      <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                        {user.current_streak} days
+                      </span>
+                    ) : (
+                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
+                        0
+                      </span>
+                    )}
+                  </td>
                   <td className="p-2 text-center">{user.checked_in_today ? "✅" : "❌"}</td>
                 </tr>
               ))}
