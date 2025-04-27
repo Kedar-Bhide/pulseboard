@@ -12,6 +12,7 @@ from app.core.summary import generate_weekly_summary
 from app.models.answer import Answer
 from app.services.analytics import get_users_who_didnt_checkin_today
 from app.core.reminder import generate_nudge
+from sqlalchemy import func 
 
 router = APIRouter()
 
@@ -229,3 +230,24 @@ def get_team_summaries(db: Session = Depends(get_db)):
             summaries.append(f"{user.email}\n{summary}\n\n")
 
     return {"full_summary": "\n".join(summaries)}
+
+@router.get("/admin/user-activity")
+def get_user_activity(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    today = datetime.utcnow().date()
+    days = [(today - timedelta(days=i)) for i in range(6, -1, -1)]  # 7 days, oldest to newest
+
+    activity = []
+    for day in days:
+        exists = (
+            db.query(Answer)
+            .filter(Answer.user_id == user.id)
+            .filter(func.date(Answer.timestamp) == day)
+            .first()
+        )
+        activity.append(1 if exists else 0)
+
+    return {"activity": activity}
