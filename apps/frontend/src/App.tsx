@@ -55,6 +55,28 @@ function App() {
         </div>
 
         <div className="mb-4">
+          <button
+            onClick={async () => {
+              try {
+                const summary = await fetchTeamSummaries();
+                const blob = new Blob([summary], { type: "text/plain;charset=utf-8" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "pulseboard_team_summary.txt";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              } catch (err) {
+                alert("Failed to download summaries!");
+              }
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          >
+            📦 Download Team Summaries
+          </button>
+        </div>
+
+        <div className="mb-4">
           <label htmlFor="search" className="mr-2 font-medium">Search by Email:</label>
           <input
             id="search"

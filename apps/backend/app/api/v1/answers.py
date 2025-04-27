@@ -209,3 +209,23 @@ def get_weekly_summary(email: str, db: Session = Depends(get_db)):
 
     summary = generate_weekly_summary(answers)
     return {"summary": summary}
+
+@router.get("/admin/team-summaries")
+def get_team_summaries(db: Session = Depends(get_db)):
+    users = db.query(User).filter(User.slack_id.isnot(None)).all()
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    summaries = []
+
+    for user in users:
+        answers = (
+            db.query(Answer)
+            .filter(Answer.user_id == user.id)
+            .filter(Answer.timestamp >= week_ago)
+            .order_by(Answer.timestamp.asc())
+            .all()
+        )
+        if answers:
+            summary = generate_weekly_summary(answers)
+            summaries.append(f"{user.email}\n{summary}\n\n")
+
+    return {"full_summary": "\n".join(summaries)}

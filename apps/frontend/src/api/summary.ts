@@ -12,3 +12,10 @@ export interface UserSummary {
     if (!res.ok) throw new Error("Failed to fetch engagement summary");
     return res.json();
   }
+
+  export async function fetchTeamSummaries(): Promise<string> {
+    const res = await fetch("http://localhost:8000/api/v1/admin/team-summaries");
+    if (!res.ok) throw new Error("Failed to fetch team summaries");
+    const data = await res.json();
+    return data.full_summary;
+  }
