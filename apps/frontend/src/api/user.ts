@@ -21,9 +21,9 @@ export async function fetchUserWeeklySummary(userEmail: string): Promise<WeeklyS
   return res.json();
 }
 
-export async function fetchUserActivity(userEmail: string): Promise<number[]> {
-  const res = await fetch(`http://localhost:8000/api/v1/admin/user-activity?email=${userEmail}`);
-  if (!res.ok) throw new Error("Failed to fetch user activity");
-  const data = await res.json();
-  return data.activity;
-}
+// export async function fetchUserActivity(userEmail: string): Promise<number[]> {
+//   const res = await fetch(`http://localhost:8000/api/v1/admin/user-activity?email=${userEmail}`);
+//   if (!res.ok) throw new Error("Failed to fetch user activity");
+//   const data = await res.json();
+//   return data.activity;
+// }

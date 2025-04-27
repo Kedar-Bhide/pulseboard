@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { fetchEngagementSummary, fetchTeamSummaries, UserSummary } from "./api/summary";
+import { fetchEngagementSummary, fetchTeamSummaries, fetchBatchActivity, UserSummary } from "./api/summary";
 import UserAnswers from "./components/UserAnswers";
 import { Sparklines, SparklinesBars } from "react-sparklines";
-import { fetchUserActivity } from "./api/user";
+// import { fetchUserActivity } from "./api/user";
 
 function App() {
   const [summary, setSummary] = useState<UserSummary[]>([]);
@@ -14,12 +14,11 @@ function App() {
   useEffect(() => {
     fetchEngagementSummary()
       .then(async (data) => {
-        const updatedData = await Promise.all(
-          data.map(async (user) => {
-            const activity = await fetchUserActivity(user.user);
-            return { ...user, activity };
-          })
-        );
+        const batchActivity = await fetchBatchActivity();
+        const updatedData = data.map(user => ({
+          ...user,
+          activity: batchActivity[user.user] || [0, 0, 0, 0, 0, 0, 0],
+        }));
         setSummary(updatedData);
         setFiltered(updatedData);
       })

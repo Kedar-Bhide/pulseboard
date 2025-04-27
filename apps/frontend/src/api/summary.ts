@@ -20,3 +20,10 @@ export interface UserSummary {
     const data = await res.json();
     return data.full_summary;
   }
+
+  export async function fetchBatchActivity(): Promise<{ [email: string]: number[] }> {
+    const res = await fetch("http://localhost:8000/api/v1/admin/batch-activity");
+    if (!res.ok) throw new Error("Failed to fetch batch activity");
+    const data = await res.json();
+    return data.activity;
+  }
