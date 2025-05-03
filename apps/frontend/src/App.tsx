@@ -10,6 +10,8 @@ function App() {
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [filtered, setFiltered] = useState<UserSummary[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortField, setSortField] = useState<string>("user");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     fetchEngagementSummary()
@@ -30,6 +32,31 @@ function App() {
       setFiltered(summary);
     } else if (value === "no-checkin") {
       setFiltered(summary.filter((u) => !u.checked_in_today));
+    }
+  };
+
+  const sortData = (data: UserSummary[]) => {
+    const sorted = [...data].sort((a, b) => {
+      const valA = a[sortField as keyof UserSummary];
+      const valB = b[sortField as keyof UserSummary];
+  
+      if (typeof valA === "number" && typeof valB === "number") {
+        return sortDirection === "asc" ? valA - valB : valB - valA;
+      }
+  
+      return sortDirection === "asc"
+        ? String(valA).localeCompare(String(valB))
+        : String(valB).localeCompare(String(valA));
+    });
+    return sorted;
+  };
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
     }
   };
 
@@ -109,16 +136,21 @@ function App() {
           <table className="w-full border mt-4 text-sm">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-2 text-left">User</th>
-                <th className="p-2 text-center">Total</th>
-                <th className="p-2 text-center">Last</th>
-                <th className="p-2 text-center">Streak</th>
-                <th className="p-2 text-center">Today</th>
+                <th className="p-2 text-left cursor-pointer" onClick={() => handleSort("user")}>User</th>
+                <th className="p-2 text-center cursor-pointer" onClick={() => handleSort("total_checkins")}>Total</th>
+                <th className="p-2 text-center cursor-pointer" onClick={() => handleSort("last_checkin")}>Last</th>
+                <th className="p-2 text-center cursor-pointer" onClick={() => handleSort("current_streak")}>Streak</th>
+                <th
+                  className="p-2 text-center cursor-pointer"
+                  onClick={() => handleSort("total_checkins")}
+                >
+                  Total {sortField === "total_checkins" ? (sortDirection === "asc" ? "↑" : "↓") : ""}
+                </th>
                 <th className="p-2 text-center">Trend</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((user) => (
+              {sortData(filtered).map((user) => (
                 <tr key={user.user} className="hover:bg-gray-50 border-t">
                   <td className="p-2">
                     <button
