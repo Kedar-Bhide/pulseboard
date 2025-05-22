@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { fetchEngagementSummary, fetchTeamSummaries, fetchBatchActivity, UserSummary } from "./api/summary";
+import { fetchEngagementSummary, fetchTeamSummaries, fetchBatchActivity } from "./api/summary";
 import UserAnswers from "./components/UserAnswers";
-import { Sparklines, SparklinesBars } from "react-sparklines";
-// import { fetchUserActivity } from "./api/user";
+import Layout from "./components/Layout";
+import TeamSummaryTable from "./components/TeamSummaryTable";
+import { UserSummary } from "./types";
 
 function App() {
   const [summary, setSummary] = useState<UserSummary[]>([]);
@@ -35,22 +36,6 @@ function App() {
     }
   };
 
-  const sortData = (data: UserSummary[]) => {
-    const sorted = [...data].sort((a, b) => {
-      const valA = a[sortField as keyof UserSummary];
-      const valB = b[sortField as keyof UserSummary];
-  
-      if (typeof valA === "number" && typeof valB === "number") {
-        return sortDirection === "asc" ? valA - valB : valB - valA;
-      }
-  
-      return sortDirection === "asc"
-        ? String(valA).localeCompare(String(valB))
-        : String(valB).localeCompare(String(valA));
-    });
-    return sorted;
-  };
-
   const handleSort = (field: string) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -65,133 +50,93 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
-      <header className="bg-white shadow sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Pulseboard Admin</h1>
-          <span className="text-sm text-gray-500">Built with FastAPI + GPT</span>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-6 py-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Team Check-In Summary</h2>
-          <div>
-            <label className="mr-2 font-medium">Filter:</label>
+    <Layout>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">Team Check-In Summary</h2>
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  const query = e.target.value.toLowerCase();
+                  setSearchQuery(query);
+                  if (!query) {
+                    setFiltered(summary);
+                  } else {
+                    setFiltered(summary.filter((u) => u.user.toLowerCase().includes(query)));
+                  }
+                }}
+                placeholder="Search by email..."
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <svg
+                className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
             <select
-              className="border px-2 py-1 rounded"
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               onChange={(e) => handleFilterChange(e.target.value)}
             >
               <option value="all">All Users</option>
-              <option value="no-checkin">Only No Check-In Today</option>
+              <option value="no-checkin">No Check-In Today</option>
             </select>
+            <button
+              onClick={async () => {
+                try {
+                  const summary = await fetchTeamSummaries();
+                  const blob = new Blob([summary], { type: "text/plain;charset=utf-8" });
+                  const link = document.createElement("a");
+                  link.href = URL.createObjectURL(blob);
+                  link.download = "pulseboard_team_summary.txt";
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                } catch (err) {
+                  alert("Failed to download summaries!");
+                }
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+              <span>Download Summary</span>
+            </button>
           </div>
         </div>
 
-        <div className="mb-4">
-          <button
-            onClick={async () => {
-              try {
-                const summary = await fetchTeamSummaries();
-                const blob = new Blob([summary], { type: "text/plain;charset=utf-8" });
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = "pulseboard_team_summary.txt";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              } catch (err) {
-                alert("Failed to download summaries!");
-              }
-            }}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-          >
-            📦 Download Team Summaries
-          </button>
-        </div>
-
-        <div className="mb-4">
-          <label htmlFor="search" className="mr-2 font-medium">Search by Email:</label>
-          <input
-            id="search"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              const query = e.target.value.toLowerCase();
-              setSearchQuery(query);
-              if (!query) {
-                setFiltered(summary); // Reset if search is empty
-              } else {
-                setFiltered(summary.filter((u) => u.user.toLowerCase().includes(query)));
-              }
-            }}
-            className="border px-3 py-1 rounded w-64"
-            placeholder="e.g. maya@startup.com"
-          />
-        </div>
-
-        {loading ? (
-          <p className="text-gray-600">Loading...</p>
-        ) : (
-          <table className="w-full border mt-4 text-sm">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 text-left cursor-pointer" onClick={() => handleSort("user")}>User</th>
-                <th className="p-2 text-center cursor-pointer" onClick={() => handleSort("total_checkins")}>Total</th>
-                <th className="p-2 text-center cursor-pointer" onClick={() => handleSort("last_checkin")}>Last</th>
-                <th className="p-2 text-center cursor-pointer" onClick={() => handleSort("current_streak")}>Streak</th>
-                <th
-                  className="p-2 text-center cursor-pointer"
-                  onClick={() => handleSort("total_checkins")}
-                >
-                  Total {sortField === "total_checkins" ? (sortDirection === "asc" ? "↑" : "↓") : ""}
-                </th>
-                <th className="p-2 text-center">Trend</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortData(filtered).map((user) => (
-                <tr key={user.user} className="hover:bg-gray-50 border-t">
-                  <td className="p-2">
-                    <button
-                      onClick={() => setSelectedUser(user.user)}
-                      className="text-blue-600 hover:underline"
-                    >
-                      {user.user}
-                    </button>
-                  </td>
-                  <td className="p-2 text-center">{user.total_checkins}</td>
-                  <td className="p-2 text-center">{user.last_checkin || "—"}</td>
-                  <td className="p-2 text-center">
-                    {user.current_streak > 5 ? (
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
-                        🔥 {user.current_streak} days
-                      </span>
-                    ) : user.current_streak > 0 ? (
-                      <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
-                        {user.current_streak} days
-                      </span>
-                    ) : (
-                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
-                        0
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-2 text-center">{user.checked_in_today ? "✅" : "❌"}</td>
-                  <td className="p-2 text-center">
-                    <div className="h-6 w-20 mx-auto">
-                      <Sparklines data={user.activity || [0, 0, 0, 0, 0, 0, 0]} limit={7} width={60} height={20} margin={2}>
-                        <SparklinesBars style={{ fill: "#4299e1" }} />
-                      </Sparklines>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </main>
-    </div>
+        <TeamSummaryTable
+          data={filtered}
+          loading={loading}
+          onUserSelect={setSelectedUser}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+        />
+      </div>
+    </Layout>
   );
 }
 
