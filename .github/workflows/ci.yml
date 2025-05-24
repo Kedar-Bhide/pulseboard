@@ -34,6 +34,14 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/pulseboard_test
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: test_secret_key
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      DEBUG: true
+
     steps:
     - uses: actions/checkout@v3
 
@@ -52,7 +60,7 @@ jobs:
         cd apps/backend
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-cov
+        pip install pytest pytest-cov pytest-asyncio httpx
 
     - name: Install Node.js dependencies
       run: |
@@ -62,7 +70,7 @@ jobs:
     - name: Run backend tests
       run: |
         cd apps/backend
-        pytest --cov=app tests/
+        pytest --cov=app tests/ -v
 
     - name: Run frontend tests
       run: |
