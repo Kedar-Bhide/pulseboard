@@ -12,13 +12,6 @@ Pulseboard is a lightweight, AI-powered journaling tool that helps teams stay al
 - **Interactive Dashboard**: Visualize team activity and progress
 - **Export Capabilities**: Download team summaries for reporting
 
-## 🛠️ Tech Stack
-
-- **Frontend**: React + TypeScript + TailwindCSS
-- **Backend**: FastAPI + Python
-- **AI Integration**: OpenAI GPT
-- **Data Visualization**: React Sparklines
-
 ## 🚀 Getting Started
 
 1. Clone the repository
