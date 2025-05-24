@@ -1,56 +1,139 @@
-# Pulseboard
+# PulseBoard
 
-**Async check-in system for startup teams — built with FastAPI and GPT.**
+A modern team pulse survey application built with FastAPI and React.
 
-Pulseboard is a lightweight, AI-powered journaling tool that helps teams stay aligned, reflect daily, and track momentum — all without meetings.
+## Features
 
-## 🌟 Features
+- User authentication and authorization
+- Team pulse surveys
+- Real-time updates
+- Slack integration
+- Email notifications
+- Beautiful and responsive UI
 
-- **Daily Team Check-ins**: Track team engagement and participation
-- **AI-Powered Insights**: Get automated summaries and trends
-- **Streak Tracking**: Monitor team consistency and engagement
-- **Interactive Dashboard**: Visualize team activity and progress
-- **Export Capabilities**: Download team summaries for reporting
+## Tech Stack
 
-## 🚀 Getting Started
+### Backend
+- FastAPI
+- PostgreSQL
+- SQLAlchemy
+- Alembic
+- Celery
+- Redis
+- JWT Authentication
 
-1. Clone the repository
-2. Set up the backend:
-   ```bash
-   cd apps/backend
-   python -m venv venv
-   source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-   pip install -r requirements.txt
-   ```
+### Frontend
+- React
+- TypeScript
+- Tailwind CSS
+- Axios
+- React Query
 
-3. Set up the frontend:
-   ```bash
-   cd apps/frontend
-   npm install
-   ```
+## Prerequisites
 
-4. Configure environment variables:
-   - Copy `.env.example` to `.env`
-   - Add your OpenAI API key and other configurations
+- Docker and Docker Compose
+- Node.js 18+
+- Python 3.11+
+- PostgreSQL 15+
+- Redis 7+
 
-5. Run the development servers:
-   ```bash
-   # Terminal 1 (Backend)
-   cd apps/backend
-   uvicorn main:app --reload
+## Getting Started
 
-   # Terminal 2 (Frontend)
-   cd apps/frontend
-   npm run dev
-   ```
-
-## 📝 Project Structure
-
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/pulseboard.git
+cd pulseboard
 ```
-pulseboard/
-├── apps/
-│   ├── frontend/          # React + TypeScript frontend
-│   └── backend/           # FastAPI backend
-├── shared/               # Shared types and utilities
-└── requirements.txt      # Python dependencies
+
+2. Create and configure environment files:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
 ```
+
+3. Start the development environment:
+```bash
+docker-compose up -d
+```
+
+4. Initialize the database:
+```bash
+docker-compose exec backend python scripts/init_db.py
+```
+
+5. Access the applications:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/api/docs
+
+## Development
+
+### Backend Development
+
+1. Create and activate a virtual environment:
+```bash
+cd apps/backend
+python -m venv venv
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Run the development server:
+```bash
+./scripts/run_dev.sh
+```
+
+### Frontend Development
+
+1. Install dependencies:
+```bash
+cd apps/frontend
+npm install
+```
+
+2. Start the development server:
+```bash
+npm run dev
+```
+
+## Testing
+
+### Backend Tests
+```bash
+cd apps/backend
+pytest
+```
+
+### Frontend Tests
+```bash
+cd apps/frontend
+npm test
+```
+
+## Deployment
+
+1. Build the Docker images:
+```bash
+docker-compose build
+```
+
+2. Start the production environment:
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
