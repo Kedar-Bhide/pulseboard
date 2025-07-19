@@ -1,7 +1,7 @@
 import resend
-from app.config import settings
+from app.core.config import settings
 
-resend.api_key = settings.RESEND_API_KEY
+resend.api_key = settings.OPENAI_API_KEY
 
 def send_email(to_email: str, subject: str, body: str):
     try:

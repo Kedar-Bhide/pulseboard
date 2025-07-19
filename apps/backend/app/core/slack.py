@@ -1,7 +1,7 @@
 import os
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
-from app.config import settings
+from app.core.config import settings
 
 client = WebClient(token=settings.SLACK_BOT_TOKEN)
 

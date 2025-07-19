@@ -9,7 +9,7 @@ export interface UserSummary {
   checked_in_today: boolean;
   activity?: number[];
 }
-  
+
 export async function fetchEngagementSummary(): Promise<UserSummary[]> {
   const res = await fetch(`${API_URL}/admin/engagement-summary`);
   if (!res.ok) throw new Error("Failed to fetch engagement summary");
@@ -28,4 +28,10 @@ export async function fetchBatchActivity(): Promise<{ [email: string]: number[] 
   if (!res.ok) throw new Error("Failed to fetch batch activity");
   const data = await res.json();
   return data.activity;
+}
+
+export async function fetchUserAnswers(email: string) {
+  const res = await fetch(`${API_URL}/admin/user-answers?email=${encodeURIComponent(email)}`);
+  if (!res.ok) throw new Error("Failed to fetch user answers");
+  return res.json();
 }

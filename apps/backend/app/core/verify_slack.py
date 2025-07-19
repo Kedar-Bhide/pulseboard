@@ -2,7 +2,7 @@ import hmac
 import hashlib
 import time
 from fastapi import Request, HTTPException
-from app.config import settings
+from app.core.config import settings
 
 def verify_slack_request(request: Request, body: bytes):
     slack_signature = request.headers.get("X-Slack-Signature", "")
